@@ -1,1 +1,1 @@
-# CPSC322-FinalProject
+# CPSC322 Final Project: Paleontology Classifier
