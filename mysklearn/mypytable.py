@@ -195,7 +195,7 @@ class MyPyTable:
         list_to_remove = []
         for index, row in enumerate(self.data):
             for element in row:
-                if element == "NA":
+                if element in ["NA",""]:
                     list_to_remove.append(index)
         self.drop_rows(list_to_remove)
 
