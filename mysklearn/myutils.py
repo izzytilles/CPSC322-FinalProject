@@ -625,7 +625,7 @@ def preprocess_table(table):
 
     This function performs several data preprocessing steps on the given table:
     - Removes specified columns (index 0, 1, 2, 5).
-    - Shuffles the rows such that an equal number of 'TRUE' and 'FALSE' values are sampled.
+    - Shuffles the rows such that an equal number of 'True' and 'False' values are sampled.
     - Discretizes continuous columns (estimated_diameter_min, estimated_diameter_max, relative_velocity, miss_distance)
       into discrete bins based on their ranges, and replaces the continuous values with the corresponding bin index.
 
@@ -654,9 +654,9 @@ def preprocess_table(table):
     true_list = []
     false_list = []
     for i, item in enumerate(space_table.data):
-        if "TRUE" in item:
+        if "True" in item:
             true_list.append(i)
-        elif "FALSE" in item:
+        elif "False" in item:
             false_list.append(i)
     np.random.shuffle(true_list)
     np.random.shuffle(false_list)
