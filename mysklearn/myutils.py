@@ -618,3 +618,112 @@ def discretization(data):
                 break
     bin_labels = [f"{lower:.1f} to {upper:.1f}" for lower, upper in bins]
     return bins, bin_counts
+
+def preprocess_table(table):
+    """Preprocesses a table by removing specified columns, shuffling data,
+    discretizing continuous features, and returning labels for the discretized bins.
+
+    This function performs several data preprocessing steps on the given table:
+    - Removes specified columns (index 0, 1, 2, 5).
+    - Shuffles the rows such that an equal number of 'TRUE' and 'FALSE' values are sampled.
+    - Discretizes continuous columns (estimated_diameter_min, estimated_diameter_max, relative_velocity, miss_distance)
+      into discrete bins based on their ranges, and replaces the continuous values with the corresponding bin index.
+
+    Args:
+        table (MyPyTable): A MyPyTable object containing data to be preprocessed.
+
+    Returns:
+        dict: A dictionary containing the labels for each discretized column:
+            - "min_labels": Labels for the 'estimated_diameter_min' column bins.
+            - "max_labels": Labels for the 'estimated_diameter_max' column bins.
+            - "velocity_labels": Labels for the 'relative_velocity' column bins.
+            - "miss_labels": Labels for the 'miss_distance' column bins.
+    """
+    space_table = table
+    columns_to_remove = [0, 1, 2, 5]
+    space_table.column_names = [
+        col
+        for i, col in enumerate(space_table.column_names)
+        if i not in columns_to_remove
+    ]
+    space_table.data = [
+        [value for i, value in enumerate(row) if i not in columns_to_remove]
+        for row in space_table.data
+    ]
+
+    true_list = []
+    false_list = []
+    for i, item in enumerate(space_table.data):
+        if "TRUE" in item:
+            true_list.append(i)
+        elif "FALSE" in item:
+            false_list.append(i)
+    np.random.shuffle(true_list)
+    np.random.shuffle(false_list)
+    full_sample = []
+    true_sample = [space_table.data[i] for i in true_list[:1000]]
+    false_sample = [space_table.data[i] for i in false_list[:1000]]
+    full_sample.extend(true_sample)
+    full_sample.extend(false_sample)
+    np.random.shuffle(full_sample)
+    space_table.data = full_sample
+    min_diameter_bins, min_labels = discretization(
+        space_table.get_column(space_table.column_names.index("estimated_diameter_min"))
+    )
+
+    for instance in space_table.data:
+        for i, (lower, upper) in enumerate(min_diameter_bins):
+            if (
+                lower
+                <= instance[space_table.column_names.index("estimated_diameter_min")]
+                <= upper
+            ):
+                instance[space_table.column_names.index("estimated_diameter_min")] = i
+                break
+
+    max_diameter_bins, max_labels = discretization(
+        space_table.get_column(space_table.column_names.index("estimated_diameter_max"))
+    )
+
+    for instance in space_table.data:
+        for i, (lower, upper) in enumerate(max_diameter_bins):
+            if (
+                lower
+                <= instance[space_table.column_names.index("estimated_diameter_max")]
+                <= upper
+            ):
+                instance[space_table.column_names.index("estimated_diameter_max")] = i
+                break
+
+    velocity_bins, velocity_labels = discretization(
+        space_table.get_column(space_table.column_names.index("relative_velocity"))
+    )
+
+    for instance in space_table.data:
+        for i, (lower, upper) in enumerate(velocity_bins):
+            if (
+                lower
+                <= instance[space_table.column_names.index("relative_velocity")]
+                <= upper
+            ):
+                instance[space_table.column_names.index("relative_velocity")] = i
+                break
+
+    miss_bins, miss_labels = discretization(
+        space_table.get_column(space_table.column_names.index("miss_distance"))
+    )
+    for instance in space_table.data:
+        for i, (lower, upper) in enumerate(miss_bins):
+            if (
+                lower
+                <= instance[space_table.column_names.index("miss_distance")]
+                <= upper
+            ):
+                instance[space_table.column_names.index("miss_distance")] = i
+                break
+    return {
+        "min_labels": min_labels,
+        "max_labels": max_labels,
+        "velocity_labels": velocity_labels,
+        "miss_labels": miss_labels,
+    }
