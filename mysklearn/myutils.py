@@ -411,22 +411,14 @@ def tdidt(
 
         # Base Case 3: Empty partition (empty partition)
         elif len(att_partition) == 0:
-            if available_attributes:
-                return tdidt(
-                    current_instances,
-                    available_attributes,
-                    header,
-                    attribute_domain,
-                )
-            else:
-                # If no attributes left, replace the empty partition with a majority class leaf node
-                majority_class_label = majority_class(current_instances)
-                return [
-                    "Leaf",
-                    majority_class_label,
-                    len(current_instances),
-                    parent_node_size,
-                ]
+            # If no attributes left, replace the empty partition with a majority class leaf node
+            majority_class_label = majority_class(current_instances)
+            return [
+                "Leaf",
+                majority_class_label,
+                len(current_instances),
+                parent_node_size,
+            ]
 
         # Recursive case: Split further by calling tdidt on the partition
         else:
@@ -600,3 +592,29 @@ def add_nodes_and_edges(
             graph.edge(parent, leaf_node_name, label=str(value))  # The value
 
     return node_name, node_counter
+
+
+def discretization(data):
+    """Groups data into five equal-width bins and plots the frequency of each bin.
+
+    Args:
+        data (list): A list of numeric values to be binned.
+
+    Returns:
+        None: Displays a bar chart of the frequency distribution in five equal-width bins.
+    """
+    num_bins = 5
+    range_value = max(data) - min(data)
+    bin_width = range_value / num_bins
+    bins = []
+    bin_counts = [0] * num_bins
+    for i in range(num_bins):
+        bins.append((min(data) + i * bin_width, min(data) + (i + 1) * bin_width))
+    for value in data:
+        for i, (lower, upper) in enumerate(bins):
+            if lower <= value < upper:
+                value = i
+                bin_counts[i] += 1
+                break
+    bin_labels = [f"{lower:.1f} to {upper:.1f}" for lower, upper in bins]
+    return bins, bin_counts
