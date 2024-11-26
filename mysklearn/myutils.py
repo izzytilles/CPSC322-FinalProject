@@ -602,27 +602,25 @@ def discretization(data, num_bins=None):
 
     Returns:
         None: Displays a bar chart of the frequency distribution in five equal-width bins.
+
+    Note:
+        Data is assumed to not contain any outliers
     """
     if not num_bins:
         num_bins = 2
-    # clean_data = remove_outliers(data)
-    # clean_data = replace_outliers(data)
-    clean_data = data
-    # print("data:", clean_data[0])
-    print("unclean data", max(data))
-    print("clean", max(clean_data))
-    range_value = max(clean_data) - min(clean_data)
+
+    range_value = max(data) - min(data)
     bin_width = range_value / num_bins
     bins = []
     bin_counts = [0] * num_bins
     if num_bins == 2:
-        bin_width = np.median(clean_data)
+        bin_width = np.median(data)
         bins.append((0.0, bin_width))
-        bins.append((bin_width, max(clean_data)))
+        bins.append((bin_width, max(data)))
     else:
         for i in range(num_bins):
-            bins.append((min(clean_data) + i * bin_width, min(clean_data) + (i + 1) * bin_width))
-    for value in clean_data:
+            bins.append((min(data) + i * bin_width, min(data) + (i + 1) * bin_width))
+    for value in data:
         for i, (lower, upper) in enumerate(bins):
             if lower <= value < upper:
                 bin_counts[i] += 1
@@ -695,11 +693,11 @@ def preprocess_table(table):
     np.random.shuffle(full_sample)
     space_table.data = full_sample
 
+    # remove outliers from all columns in the data
     for index, column_name in enumerate(space_table.column_names):
-
         list_of_vals = space_table.get_column(column_name)
         new_column = replace_outliers(list_of_vals)
-        print(new_column[0])
+        # replace all values in the column with the new values (if outliers, replaced with median)
         for pos, row in enumerate(space_table.data):
             row[index] = new_column[pos]
 
