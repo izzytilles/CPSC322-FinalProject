@@ -472,7 +472,6 @@ class MyDecisionTreeClassifier:
                 return self._predict_single(
                     instance, subtree[2], header
                 )  # Recurse into the next subtree
-
         # If no match was found (shouldn't happen in a well-formed tree), we can return a default or raise an error
         raise ValueError(
             f"Unrecognized value '{attribute_value}' for attribute '{tree[1]}'"

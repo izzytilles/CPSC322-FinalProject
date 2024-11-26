@@ -644,3 +644,15 @@ def classification_report(y_true, y_pred, labels=None, output_dict=False):
     )
 
     return tabulate(table, headers=headers, tablefmt="grid")
+
+
+def pseudo_classification_report(y_true, y_pred, labels=None):
+    if labels is None:
+        labels = list(set(y_true))
+    accuracy = accuracy_score(y_true, y_pred)
+    error_rate = 1 - accuracy
+    precision = binary_precision_score(y_true, y_pred, labels=labels)
+    recall = binary_recall_score(y_true, y_pred, labels=labels)
+    f1 = binary_f1_score(y_true, y_pred, labels=labels)
+    matrix = confusion_matrix(y_true, y_pred, labels)
+    return f"Decision Tree Classifier: Accuracy = {accuracy:.2f}, Error Rate = {error_rate:.2f}, Precision = {precision:.4f}, Recall = {recall:.4f}, F1 Score = {f1:.4f}\n{tabulate(matrix, headers=labels, showindex=labels, tablefmt="fancy_grid")}"

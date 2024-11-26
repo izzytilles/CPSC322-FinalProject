@@ -594,7 +594,7 @@ def add_nodes_and_edges(
     return node_name, node_counter
 
 
-def discretization(data):
+def discretization(data, num_bins=None):
     """Groups data into five equal-width bins and plots the frequency of each bin.
 
     Args:
@@ -603,21 +603,27 @@ def discretization(data):
     Returns:
         None: Displays a bar chart of the frequency distribution in five equal-width bins.
     """
-    num_bins = 5
+    if not num_bins:
+        num_bins = 2
     range_value = max(data) - min(data)
     bin_width = range_value / num_bins
     bins = []
     bin_counts = [0] * num_bins
-    for i in range(num_bins):
-        bins.append((min(data) + i * bin_width, min(data) + (i + 1) * bin_width))
+    if num_bins == 2:
+        bin_width = np.median(data)
+        bins.append((0.0, bin_width))
+        bins.append((bin_width, max(data)))
+    else:
+        for i in range(num_bins):
+            bins.append((min(data) + i * bin_width, min(data) + (i + 1) * bin_width))
     for value in data:
         for i, (lower, upper) in enumerate(bins):
             if lower <= value < upper:
-                value = i
                 bin_counts[i] += 1
                 break
     bin_labels = [f"{lower:.1f} to {upper:.1f}" for lower, upper in bins]
-    return bins, bin_counts
+    return bins, bin_labels
+
 
 def preprocess_table(table):
     """Preprocesses a table by removing specified columns, shuffling data,
@@ -625,7 +631,7 @@ def preprocess_table(table):
 
     This function performs several data preprocessing steps on the given table:
     - Removes specified columns (index 0, 1, 2, 5).
-    - Shuffles the rows such that an equal number of 'True' and 'False' values are sampled.
+    - Shuffles the rows such that an equal number of 'TRUE' and 'FALSE' values are sampled.
     - Discretizes continuous columns (estimated_diameter_min, estimated_diameter_max, relative_velocity, miss_distance)
       into discrete bins based on their ranges, and replaces the continuous values with the corresponding bin index.
 
@@ -667,6 +673,7 @@ def preprocess_table(table):
     full_sample.extend(false_sample)
     np.random.shuffle(full_sample)
     space_table.data = full_sample
+
     min_diameter_bins, min_labels = discretization(
         space_table.get_column(space_table.column_names.index("estimated_diameter_min"))
     )
