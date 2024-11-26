@@ -605,18 +605,24 @@ def discretization(data, num_bins=None):
     """
     if not num_bins:
         num_bins = 2
-    range_value = max(data) - min(data)
+    # clean_data = remove_outliers(data)
+    # clean_data = replace_outliers(data)
+    clean_data = data
+    # print("data:", clean_data[0])
+    print("unclean data", max(data))
+    print("clean", max(clean_data))
+    range_value = max(clean_data) - min(clean_data)
     bin_width = range_value / num_bins
     bins = []
     bin_counts = [0] * num_bins
     if num_bins == 2:
-        bin_width = np.median(data)
+        bin_width = np.median(clean_data)
         bins.append((0.0, bin_width))
-        bins.append((bin_width, max(data)))
+        bins.append((bin_width, max(clean_data)))
     else:
         for i in range(num_bins):
-            bins.append((min(data) + i * bin_width, min(data) + (i + 1) * bin_width))
-    for value in data:
+            bins.append((min(clean_data) + i * bin_width, min(clean_data) + (i + 1) * bin_width))
+    for value in clean_data:
         for i, (lower, upper) in enumerate(bins):
             if lower <= value < upper:
                 bin_counts[i] += 1
@@ -624,6 +630,20 @@ def discretization(data, num_bins=None):
     bin_labels = [f"{lower:.1f} to {upper:.1f}" for lower, upper in bins]
     return bins, bin_labels
 
+def replace_outliers(data):
+    if type(data[0]) is str:
+        return data
+    # if absolute value is greater than 3 or less than -3, it is an outlier
+    z_threshold = 3.0
+    mean = np.mean(data)
+    std = np.std(data)
+    # check if value is an outlier, and save its index
+    outlier_indexes = [index for index, x in enumerate(data) if abs(x - mean) / std >= z_threshold]
+    valid_data = [value for index, value in enumerate(data) if index not in outlier_indexes]
+    median = np.median(valid_data)
+    # if value is an outlier, replace it with the median. else, keep it the same
+    new_data = [median if index in outlier_indexes else x for index, x in enumerate(data)]
+    return new_data
 
 def preprocess_table(table):
     """Preprocesses a table by removing specified columns, shuffling data,
@@ -645,6 +665,7 @@ def preprocess_table(table):
             - "velocity_labels": Labels for the 'relative_velocity' column bins.
             - "miss_labels": Labels for the 'miss_distance' column bins.
     """
+    np.random.seed(0)
     space_table = table
     columns_to_remove = [0, 1, 2, 5]
     space_table.column_names = [
@@ -673,6 +694,14 @@ def preprocess_table(table):
     full_sample.extend(false_sample)
     np.random.shuffle(full_sample)
     space_table.data = full_sample
+
+    for index, column_name in enumerate(space_table.column_names):
+
+        list_of_vals = space_table.get_column(column_name)
+        new_column = replace_outliers(list_of_vals)
+        print(new_column[0])
+        for pos, row in enumerate(space_table.data):
+            row[index] = new_column[pos]
 
     min_diameter_bins, min_labels = discretization(
         space_table.get_column(space_table.column_names.index("estimated_diameter_min"))
