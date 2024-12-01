@@ -530,6 +530,9 @@ class MyRandomForestClassifier:
         y_train(list of obj): The target y values (parallel to X_train).
             The shape of y_train is n_samples
         classifiers(list of obj): model containing the trees
+        N (int): number of trees to generate for the forest initially
+        M (int): number of 'best' trees to keep in the forest
+        F (int): number of attributes to have each tree in the Forest consider
 
     Notes:
         Loosely based on sklearn's RandomForestClassifier:
@@ -537,15 +540,18 @@ class MyRandomForestClassifier:
         Terminology: instance = sample = row and attribute = feature = column
     """
 
-    def __init__(self):
+    def __init__(self, N, M, F):
         """Initializer for MyDecisionTreeClassifier."""
         self.X_train = None
         self.y_train = None
-        self.tree = None
+        self.classifiers = []
+        self.N = N
+        self.M = M
+        self.F = F
 
     def fit(self, X_train, y_train):
-        """Fits a decision tree classifier to X_train and y_train using the TDIDT
-        (top down induction of decision tree) algorithm.
+        """Fits a random forest classifier to X_train and y_train using 
+        #TODO: fix this
 
         Args:
             X_train(list of list of obj): The list of training instances (samples).
@@ -561,14 +567,7 @@ class MyRandomForestClassifier:
             Store the tree in the tree attribute.
             Use attribute indexes to construct default attribute names (e.g. "att0", "att1", ...).
         """
-        self.X_train = X_train
-        self.y_train = y_train
-        train_data = [X_train[i] + [y_train[i]] for i in range(len(X_train))]
-        header, attribute_domains = myutils.build_header_and_domains(X_train)
-        available_attributes = header.copy()
-        self.tree = myutils.tdidt(
-            train_data, available_attributes, header, attribute_domains
-        )
+        pass
 
     def predict(self, X_test):
         """Makes predictions for test instances in X_test.
