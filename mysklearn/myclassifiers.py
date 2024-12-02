@@ -541,10 +541,12 @@ class MyRandomForestClassifier:
     """
 
     def __init__(self, N, M, F):
-        """Initializer for MyDecisionTreeClassifier."""
+        """Initializer for MyRandomForestClassifier."""
         self.X_train = None
         self.y_train = None
         self.classifiers = []
+        self.header, self.attr_domains = myutils.build_header_and_domains(self.X_train)
+        self.available_attributes = self.header.copy()
         self.N = N
         self.M = M
         self.F = F
@@ -558,15 +560,9 @@ class MyRandomForestClassifier:
                 The shape of X_train is (n_train_samples, n_features)
             y_train(list of obj): The target y values (parallel to X_train)
                 The shape of y_train is n_train_samples
-
-        Notes:
-            Since TDIDT is an eager learning algorithm, this method builds a decision tree model
-                from the training data.
-            Build a decision tree using the nested list representation described in class.
-            On a majority vote tie, choose first attribute value based on attribute domain ordering.
-            Store the tree in the tree attribute.
-            Use attribute indexes to construct default attribute names (e.g. "att0", "att1", ...).
+            
         """
+
         pass
 
     def predict(self, X_test):

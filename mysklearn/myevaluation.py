@@ -659,3 +659,25 @@ def pseudo_classification_report(y_true, y_pred, labels=None,classifier_name = N
     f1 = binary_f1_score(y_true, y_pred, labels=labels)
     matrix = confusion_matrix(y_true, y_pred, labels)
     return f"{classifier_name} Classifier: Accuracy = {accuracy:.2f}, Error Rate = {error_rate:.2f}, Precision = {precision:.4f}, Recall = {recall:.4f}, F1 Score = {f1:.4f}\n{tabulate(matrix, headers=headers, showindex=labels, tablefmt="fancy_grid")}"
+
+def compute_bootstrapped_sample(table):
+    """Collects a random sample of rows with replacement
+
+    Args:
+        table (list of lists): 2D table of all data
+
+    Returns:
+        sample (list of lists): 2D table of data to train with
+        out_of_bag_sample (list of lists): 2D table of data to test with
+        
+    Notes:
+        - similar to bootstrap_sample(), but does not separate X and y
+        - from code done in class in EnsembleFun/main.py
+    """
+    n = len(table)
+    # np.random.randint(low, high) returns random integers from low (inclusive) to high (exclusive)
+    sampled_indexes = [np.random.randint(0, n) for _ in range(n)]
+    sample = [table[index] for index in sampled_indexes]
+    out_of_bag_indexes = [index for index in list(range(n)) if index not in sampled_indexes]
+    out_of_bag_sample = [table[index] for index in out_of_bag_indexes]
+    return sample, out_of_bag_sample

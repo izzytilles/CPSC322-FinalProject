@@ -34,3 +34,6 @@ def test_fit():
         tree_list.append(classifier.tree)
     unique_trees = set(tree_list)
     assert len(unique_trees) == 3
+
+def test_predict():
+    pass

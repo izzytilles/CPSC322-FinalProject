@@ -10,6 +10,7 @@ Description: Reused utility functions
 
 import numpy as np
 from graphviz import Graph
+import mysklearn.myevaluation as myevaluation
 
 
 def discretizer_function(value):
@@ -761,3 +762,85 @@ def preprocess_table(table):
         "velocity_labels": velocity_labels,
         "miss_labels": miss_labels,
     }
+
+def compute_random_subset(values, num_values):
+    """ Selects F random attributes from an attribute list
+
+    Args:
+        values (list of strs or ints): list of attributes
+        num_values (int): how many attributes to keep (F in random forest)
+
+    Returns:
+        values_copy (list of strs or ints): random list of attributes that is F long
+
+    Notes:
+        - from code done in class in EnsembleFun/main.py
+    """
+    # let's use np.random.shuffle()
+    values_copy = values.copy()
+    np.random.shuffle(values_copy) # inplace
+    return values_copy[:num_values]
+
+def stratify_train_test_split(X, y, M):
+    # stratified train test split:
+
+    # You will need to write code to produce this, but don't feel like you need to reinvent the wheel. 
+    # When you hear stratify, think group by! Here are two ideas:
+
+    # 1. If you did the stratified k fold bonus on PA5, you can call this function with k = 3. 
+    # Use the first train/test run as your split.
+
+    # 2. Add a stratify keyword arg to train_test_split(). 
+    # If it is True, then do a group by. You can split each group and then concatenate the splits
+
+    # M is the number of trees to keep
+    myevaluation.stratified_kfold_split(M)
+    pass
+
+def concatenate_with_phrase(string_list, join_phrase):
+    """
+    Concatenates a list of strings with a specified joining phrase.
+
+    Args:
+        string_list (list of str): The list of strings to concatenate
+        join_phrase (str): The phrase used to join strings (e.g., " AND ", " OR ")
+
+    Returns:
+        result (str): A single concatenated string with the joining phrase applied
+
+    Notes:
+        The last element is not followed by the joining phrase
+    """
+    result = ""
+    for index, value in enumerate(string_list):
+        # need to -1 because max index is length - 1
+        if index < len(string_list) - 1:
+            result = result + value + join_phrase
+        else:
+            result = result + value
+    return result
+
+def print_dataset_info(pytable):
+    # print shape info
+    rows, columns = pytable.get_shape()
+    print(f"This dataset has {rows} instances and {columns} attributes")
+
+    # collect attribute info
+    attr_name = []
+    attr_type = []
+    data_row = pytable.data[0]
+    for index, col in enumerate(pytable.column_names):
+        attr_name.append(col)
+        attr_type.append(type(data_row[index]))
+    col_strings = []
+    for index in range(len(attr_name)):
+        col_strings.append(attr_name[index] + " is of type " + str(attr_type[index]))
+    print("Dataset attribute breakdown: ", concatenate_with_phrase(col_strings, " and "), ".")
+
+    # info about class attribute
+    class_attr = pytable.column_names[-1]
+    possible_class_vals = set(pytable.get_column(class_attr))
+    print(f"The attribute we are trying to predict is {class_attr}. It can be {possible_class_vals}.")
+
+
+    
