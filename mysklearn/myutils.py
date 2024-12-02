@@ -9,6 +9,7 @@ Description: Reused utility functions
 """
 
 import numpy as np
+import matplotlib.pyplot as plt
 from graphviz import Graph
 import mysklearn.myevaluation as myevaluation
 
@@ -629,6 +630,7 @@ def discretization(data, num_bins=None):
     bin_labels = [f"{lower:.1f} to {upper:.1f}" for lower, upper in bins]
     return bins, bin_labels
 
+
 def replace_outliers(data):
     if type(data[0]) is str:
         return data
@@ -637,12 +639,19 @@ def replace_outliers(data):
     mean = np.mean(data)
     std = np.std(data)
     # check if value is an outlier, and save its index
-    outlier_indexes = [index for index, x in enumerate(data) if abs(x - mean) / std >= z_threshold]
-    valid_data = [value for index, value in enumerate(data) if index not in outlier_indexes]
+    outlier_indexes = [
+        index for index, x in enumerate(data) if abs(x - mean) / std >= z_threshold
+    ]
+    valid_data = [
+        value for index, value in enumerate(data) if index not in outlier_indexes
+    ]
     median = np.median(valid_data)
     # if value is an outlier, replace it with the median. else, keep it the same
-    new_data = [median if index in outlier_indexes else x for index, x in enumerate(data)]
+    new_data = [
+        median if index in outlier_indexes else x for index, x in enumerate(data)
+    ]
     return new_data
+
 
 def preprocess_table(table):
     """Preprocesses a table by removing specified columns, shuffling data,
@@ -763,8 +772,9 @@ def preprocess_table(table):
         "miss_labels": miss_labels,
     }
 
+
 def compute_random_subset(values, num_values):
-    """ Selects F random attributes from an attribute list
+    """Selects F random attributes from an attribute list
 
     Args:
         values (list of strs or ints): list of attributes
@@ -778,24 +788,26 @@ def compute_random_subset(values, num_values):
     """
     # let's use np.random.shuffle()
     values_copy = values.copy()
-    np.random.shuffle(values_copy) # inplace
+    np.random.shuffle(values_copy)  # inplace
     return values_copy[:num_values]
+
 
 def stratify_train_test_split(X, y, M):
     # stratified train test split:
 
-    # You will need to write code to produce this, but don't feel like you need to reinvent the wheel. 
+    # You will need to write code to produce this, but don't feel like you need to reinvent the wheel.
     # When you hear stratify, think group by! Here are two ideas:
 
-    # 1. If you did the stratified k fold bonus on PA5, you can call this function with k = 3. 
+    # 1. If you did the stratified k fold bonus on PA5, you can call this function with k = 3.
     # Use the first train/test run as your split.
 
-    # 2. Add a stratify keyword arg to train_test_split(). 
+    # 2. Add a stratify keyword arg to train_test_split().
     # If it is True, then do a group by. You can split each group and then concatenate the splits
 
     # M is the number of trees to keep
     myevaluation.stratified_kfold_split(M)
     pass
+
 
 def concatenate_with_phrase(string_list, join_phrase):
     """
@@ -820,6 +832,7 @@ def concatenate_with_phrase(string_list, join_phrase):
             result = result + value
     return result
 
+
 def print_dataset_info(pytable):
     # print shape info
     rows, columns = pytable.get_shape()
@@ -835,9 +848,70 @@ def print_dataset_info(pytable):
     col_strings = []
     for index in range(len(attr_name)):
         col_strings.append(attr_name[index] + " is of type " + str(attr_type[index]))
-    print("Dataset attribute breakdown: ", concatenate_with_phrase(col_strings, " \n "), ".")
+    print(
+        "Dataset attribute breakdown: ",
+        concatenate_with_phrase(col_strings, " \n "),
+        ".",
+    )
 
     # info about class attribute
     class_attr = pytable.column_names[-1]
     possible_class_vals = set(pytable.get_column(class_attr))
-    print(f"The attribute we are trying to predict is {class_attr}. It can be {len(possible_class_vals)} different classifications: {possible_class_vals}.\n")
+    print(
+        f"The attribute we are trying to predict is {class_attr}. It can be {len(possible_class_vals)} different classifications: {possible_class_vals}.\n"
+    )
+
+
+def plot_bar_chart(dict_object):
+    plt.figure()
+    plt.xlabel("Class Label")
+    plt.ylabel("Frequency")
+    plt.title("Histogram of Is_Hazardous Class (Unprocessed)")
+    for bar in plt.bar(
+        dict_object.keys(), dict_object.values(), color="skyblue", edgecolor="black"
+    ):
+        height = bar.get_height()
+        plt.text(
+            bar.get_x() + bar.get_width() / 2,
+            height / 2,
+            str(height),
+            ha="center",
+            va="center",
+        )
+    plt.show()
+
+
+def plot_multi_hist(dict_object, data):
+    _, axes = plt.subplots(2, 2, figsize=(12, 10))
+    axes = axes.flatten()
+    for idx, (key, labels) in enumerate(dict_object.items()):
+        # Get the column index corresponding to the attribute (min, max, velocity, miss)
+        column_index = list(dict_object.keys()).index(
+            key
+        )  # Get the column index for the attribute
+
+        # Extract the binary data for the current attribute (from the first four columns)
+        attribute_data = [
+            row[column_index] for row in data
+        ]  # Select the relevant column for each row
+
+        # Plot the histogram
+        counts, bins, _ = axes[idx].hist(
+            attribute_data, bins=2, color="skyblue", edgecolor="black", width=0.4
+        )
+        for count, bin_edge in zip(counts, bins):
+            axes[idx].text(
+                bin_edge + 0.2, count / 2, str(int(count)), ha="center", va="center"
+            )
+        # Set the title and labels
+        axes[idx].set_title(f"Histogram of {key} (Processed)")
+        axes[idx].set_xticks([0, 1])
+        axes[idx].set_xticklabels(labels)
+
+        # Label the axes
+        axes[idx].set_xlabel("Category")
+        axes[idx].set_ylabel("Frequency")
+
+    # Adjust the layout and show the plot
+    plt.tight_layout()
+    plt.show()
