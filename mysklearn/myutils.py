@@ -835,12 +835,9 @@ def print_dataset_info(pytable):
     col_strings = []
     for index in range(len(attr_name)):
         col_strings.append(attr_name[index] + " is of type " + str(attr_type[index]))
-    print("Dataset attribute breakdown: ", concatenate_with_phrase(col_strings, " and "), ".")
+    print("Dataset attribute breakdown: ", concatenate_with_phrase(col_strings, " \n "), ".")
 
     # info about class attribute
     class_attr = pytable.column_names[-1]
     possible_class_vals = set(pytable.get_column(class_attr))
-    print(f"The attribute we are trying to predict is {class_attr}. It can be {possible_class_vals}.")
-
-
-    
+    print(f"The attribute we are trying to predict is {class_attr}. It can be {len(possible_class_vals)} different classifications: {possible_class_vals}.\n")
