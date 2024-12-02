@@ -597,37 +597,40 @@ def add_nodes_and_edges(
 
 
 def discretization(data, num_bins=None):
-    """Groups data into five equal-width bins and plots the frequency of each bin.
+    """Groups data into equal-frequency bins and returns the frequency distribution.
 
     Args:
         data (list): A list of numeric values to be binned.
+        num_bins (int): The number of bins to split the data into.
 
     Returns:
-        None: Displays a bar chart of the frequency distribution in five equal-width bins.
-
-    Note:
-        Data is assumed to not contain any outliers
+        bins (list): A list of tuples representing the bin ranges.
+        bin_labels (list): A list of string labels for each bin.
     """
-    if not num_bins:
-        num_bins = 2
+    if num_bins is None:
+        num_bins = 3
 
-    range_value = max(data) - min(data)
-    bin_width = range_value / num_bins
-    bins = []
+    # Sort the data to facilitate equal-frequency binning
+    sorted_data = np.sort(data)
+
+    # Compute the bin edges using percentiles
+    bin_edges = np.percentile(sorted_data, np.linspace(0, 100, num_bins + 1))
+
+    # Create the bins by pairing up consecutive percentiles
+    bins = [(bin_edges[i], bin_edges[i + 1]) for i in range(num_bins)]
+
+    # Label the bins with the range for each
+    bin_labels = [f"{lower:.1f} to {upper:.1f}" for lower, upper in bins]
+
+    # Count the frequency of values in each bin
     bin_counts = [0] * num_bins
-    if num_bins == 2:
-        bin_width = np.median(data)
-        bins.append((0.0, bin_width))
-        bins.append((bin_width, max(data)))
-    else:
-        for i in range(num_bins):
-            bins.append((min(data) + i * bin_width, min(data) + (i + 1) * bin_width))
-    for value in data:
+    for value in sorted_data:
         for i, (lower, upper) in enumerate(bins):
             if lower <= value < upper:
                 bin_counts[i] += 1
                 break
-    bin_labels = [f"{lower:.1f} to {upper:.1f}" for lower, upper in bins]
+
+    # Return the bins and labels
     return bins, bin_labels
 
 
@@ -862,11 +865,11 @@ def print_dataset_info(pytable):
     )
 
 
-def plot_bar_chart(dict_object):
+def plot_bar_chart(dict_object, data_state):
     plt.figure()
     plt.xlabel("Class Label")
     plt.ylabel("Frequency")
-    plt.title("Histogram of Is_Hazardous Class (Unprocessed)")
+    plt.title(f"Histogram of Is_Hazardous Class ({data_state})")
     for bar in plt.bar(
         dict_object.keys(), dict_object.values(), color="skyblue", edgecolor="black"
     ):
@@ -884,6 +887,7 @@ def plot_bar_chart(dict_object):
 def plot_multi_hist(dict_object, data):
     _, axes = plt.subplots(2, 2, figsize=(12, 10))
     axes = axes.flatten()
+
     for idx, (key, labels) in enumerate(dict_object.items()):
         # Get the column index corresponding to the attribute (min, max, velocity, miss)
         column_index = list(dict_object.keys()).index(
@@ -894,23 +898,113 @@ def plot_multi_hist(dict_object, data):
         attribute_data = [
             row[column_index] for row in data
         ]  # Select the relevant column for each row
+        label_data = [
+            row[-1] == "True" for row in data
+        ]  # Get True/False labels (assumed to be in the last column)
 
-        # Plot the histogram
-        counts, bins, _ = axes[idx].hist(
-            attribute_data, bins=2, color="skyblue", edgecolor="black", width=0.4
+        # Get the unique values of the attribute data to determine the number of bins
+        num_bins = len(labels)  # Number of bins based on the provided labels
+
+        # Create empty lists to store counts for True, False, and Total counts for each bin
+        bin_counts_true = [0] * num_bins
+        bin_counts_false = [0] * num_bins
+        bin_counts_total = [0] * num_bins
+
+        # Dynamically calculate the bin ranges based on the unique attribute values
+        bin_edges = [
+            min(attribute_data)
+            + i * (max(attribute_data) - min(attribute_data)) / num_bins
+            for i in range(num_bins + 1)
+        ]
+
+        # Calculate the counts for True, False, and Total labels in each bin
+        for i, (attribute_value, label) in enumerate(zip(attribute_data, label_data)):
+            for bin_index in range(num_bins):
+                if bin_edges[bin_index] <= attribute_value <= bin_edges[bin_index + 1]:
+                    if label:
+                        bin_counts_true[bin_index] += 1
+                    else:
+                        bin_counts_false[bin_index] += 1
+                    bin_counts_total[
+                        bin_index
+                    ] += 1  # Increment total for the respective bin
+                    break
+
+        # Plot the histogram with separate bars for True, False, and Total counts
+        bar_width = 0.25  # Adjusted bar width
+        bin_centers = [
+            i for i in range(num_bins)
+        ]  # Set bin centers dynamically based on number of bins
+
+        # Plot bars for True, False, and Total counts
+        axes[idx].bar(
+            [x - bar_width for x in bin_centers],
+            bin_counts_true,
+            width=bar_width,
+            color="mediumseagreen",
+            label="True",
+            edgecolor="black",
+            align="center",
         )
-        for count, bin_edge in zip(counts, bins):
+        axes[idx].bar(
+            bin_centers,
+            bin_counts_false,
+            width=bar_width,
+            color="lightcoral",
+            label="False",
+            edgecolor="black",
+            align="center",
+        )
+        axes[idx].bar(
+            [x + bar_width for x in bin_centers],
+            bin_counts_total,
+            width=bar_width,
+            color="skyblue",
+            label="Total",
+            edgecolor="black",
+            align="center",
+        )
+
+        # Add the count annotations on the bars
+        for i, (true_count, false_count, total_count) in enumerate(
+            zip(bin_counts_true, bin_counts_false, bin_counts_total)
+        ):
             axes[idx].text(
-                bin_edge + 0.2, count / 2, str(int(count)), ha="center", va="center"
+                bin_centers[i] - bar_width,
+                (true_count + 0.1) / 2,
+                str(true_count),
+                ha="center",
+                va="bottom",
+                color="black",
             )
+            axes[idx].text(
+                bin_centers[i],
+                (false_count + 0.1) / 2,
+                str(false_count),
+                ha="center",
+                va="bottom",
+                color="black",
+            )
+            axes[idx].text(
+                bin_centers[i] + bar_width,
+                (total_count + 0.1) / 2,
+                total_count,
+                ha="center",
+                va="bottom",
+                color="black",
+            )
+
         # Set the title and labels
         axes[idx].set_title(f"Histogram of {key} (Processed)")
-        axes[idx].set_xticks([0, 1])
+        axes[idx].set_xticks(bin_centers)  # Dynamically set xticks based on bin_centers
         axes[idx].set_xticklabels(labels)
 
         # Label the axes
         axes[idx].set_xlabel("Category")
         axes[idx].set_ylabel("Frequency")
+
+        # Add legend
+        axes[idx].legend()
 
     # Adjust the layout and show the plot
     plt.tight_layout()
