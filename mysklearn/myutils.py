@@ -890,27 +890,19 @@ def plot_multi_hist(dict_object, data):
 
     for idx, (key, labels) in enumerate(dict_object.items()):
         # Get the column index corresponding to the attribute (min, max, velocity, miss)
-        column_index = list(dict_object.keys()).index(
-            key
-        )  # Get the column index for the attribute
+        column_index = list(dict_object.keys()).index(key)
 
         # Extract the binary data for the current attribute (from the first four columns)
-        attribute_data = [
-            row[column_index] for row in data
-        ]  # Select the relevant column for each row
-        label_data = [
-            row[-1] == "True" for row in data
-        ]  # Get True/False labels (assumed to be in the last column)
+        attribute_data = [row[column_index] for row in data]
+        label_data = [row[-1] == "True" for row in data]
 
-        # Get the unique values of the attribute data to determine the number of bins
-        num_bins = len(labels)  # Number of bins based on the provided labels
+        num_bins = len(labels)
 
-        # Create empty lists to store counts for True, False, and Total counts for each bin
         bin_counts_true = [0] * num_bins
         bin_counts_false = [0] * num_bins
         bin_counts_total = [0] * num_bins
 
-        # Dynamically calculate the bin ranges based on the unique attribute values
+        # Dynamically calculate the bin ranges
         bin_edges = [
             min(attribute_data)
             + i * (max(attribute_data) - min(attribute_data)) / num_bins
@@ -932,11 +924,8 @@ def plot_multi_hist(dict_object, data):
 
         # Plot the histogram with separate bars for True, False, and Total counts
         bar_width = 0.25  # Adjusted bar width
-        bin_centers = [
-            i for i in range(num_bins)
-        ]  # Set bin centers dynamically based on number of bins
+        bin_centers = [i for i in range(num_bins)]
 
-        # Plot bars for True, False, and Total counts
         axes[idx].bar(
             [x - bar_width for x in bin_centers],
             bin_counts_true,
@@ -996,7 +985,7 @@ def plot_multi_hist(dict_object, data):
 
         # Set the title and labels
         axes[idx].set_title(f"Histogram of {key} (Processed)")
-        axes[idx].set_xticks(bin_centers)  # Dynamically set xticks based on bin_centers
+        axes[idx].set_xticks(bin_centers)
         axes[idx].set_xticklabels(labels)
 
         # Label the axes
@@ -1004,8 +993,11 @@ def plot_multi_hist(dict_object, data):
         axes[idx].set_ylabel("Frequency")
 
         # Add legend
-        axes[idx].legend()
+        axes[idx].legend(loc="upper left")
 
-    # Adjust the layout and show the plot
+        # Rotate x-tick labels and adjust layout for all subplots
+        plt.setp(axes[idx].get_xticklabels(), fontsize=8.5)
+
+    # Adjust the layout to prevent label overlap
     plt.tight_layout()
     plt.show()
