@@ -1,9 +1,9 @@
 """
-Programmer: Michael D'Arcy-Evans
+Programmers: Michael D'Arcy-Evans and Isabel Tilles
 Class: CPSC322-01, Fall 2024
-Programming Assignment #6
-11/5/2024
-I attempted the bonus.
+Final Project
+12/6/2024
+We attempted the bonus.
 
 Description: Reused utility functions
 """
@@ -866,21 +866,27 @@ def print_dataset_info(pytable):
 
 
 def plot_bar_chart(dict_object, data_state):
-    plt.figure()
+    # Initialize the plot
+    plt.figure(figsize=(10, 6))
     plt.xlabel("Class Label")
     plt.ylabel("Frequency")
     plt.title(f"Histogram of Is_Hazardous Class ({data_state})")
-    for bar in plt.bar(
-        dict_object.keys(), dict_object.values(), color="skyblue", edgecolor="black"
-    ):
-        height = bar.get_height()
-        plt.text(
-            bar.get_x() + bar.get_width() / 2,
-            height / 2,
-            str(height),
-            ha="center",
-            va="center",
-        )
+    # Iterate through the data, and color the bars individually
+    for i, (class_label, count) in enumerate(dict_object.items()):
+        if i % 2 == 0:  # Assuming even indices represent success
+            color = "mediumseagreen"
+        else:  # Odd indices represent failure
+            color = "lightcoral"
+        for bar in plt.bar([class_label], [count], color=color, edgecolor="black"):
+            height = bar.get_height()
+            plt.text(
+                bar.get_x() + bar.get_width() / 2,
+                height / 2,
+                str(height),
+                ha="center",
+                va="center",
+            )
+    # Show the plot
     plt.show()
 
 
