@@ -12,6 +12,7 @@ import numpy as np
 from graphviz import Graph
 from mysklearn import myutils
 from mysklearn.mysimplelinearregressor import MySimpleLinearRegressor
+from mysklearn import myevaluation
 
 
 class MySimpleLinearRegressionClassifier:
@@ -391,6 +392,7 @@ class MyDecisionTreeClassifier:
         y_train(list of obj): The target y values (parallel to X_train).
             The shape of y_train is n_samples
         tree(nested list): The extracted tree model.
+        F(int): The number of attributes to select from when doing TDIDT algorithm (only used if part of a random forest)
 
     Notes:
         Loosely based on sklearn's DecisionTreeClassifier:
@@ -398,11 +400,12 @@ class MyDecisionTreeClassifier:
         Terminology: instance = sample = row and attribute = feature = column
     """
 
-    def __init__(self):
+    def __init__(self, F = None):
         """Initializer for MyDecisionTreeClassifier."""
         self.X_train = None
         self.y_train = None
         self.tree = None
+        self.F = F
 
     def fit(self, X_train, y_train):
         """Fits a decision tree classifier to X_train and y_train using the TDIDT
@@ -428,7 +431,7 @@ class MyDecisionTreeClassifier:
         header, attribute_domains = myutils.build_header_and_domains(X_train)
         available_attributes = header.copy()
         self.tree = myutils.tdidt(
-            train_data, available_attributes, header, attribute_domains
+            train_data, available_attributes, header, attribute_domains, F = self.F
         )
 
     def predict(self, X_test):
@@ -522,7 +525,6 @@ class MyDecisionTreeClassifier:
 
 class MyRandomForestClassifier:
     """Represents a random forest classifier.
-    #TODO: customize this for Random Forests
 
     Attributes:
         X_train(list of list of obj): The list of training instances (samples).
@@ -545,15 +547,12 @@ class MyRandomForestClassifier:
         self.X_train = None
         self.y_train = None
         self.classifiers = []
-        self.header, self.attr_domains = myutils.build_header_and_domains(self.X_train)
-        self.available_attributes = self.header.copy()
         self.N = N
         self.M = M
         self.F = F
 
     def fit(self, X_train, y_train):
-        """Fits a random forest classifier to X_train and y_train using 
-        #TODO: fix this
+        """Fits a random forest classifier, forms all trees using X_train and y_train
 
         Args:
             X_train(list of list of obj): The list of training instances (samples).
@@ -562,11 +561,14 @@ class MyRandomForestClassifier:
                 The shape of y_train is n_train_samples
             
         """
+        self.X_train = X_train
+        self.y_train = y_train
+        myutils.set_random_seed(0)
 
-        pass
-
+        self.classifiers = self.generate_final_forest()
+        
     def predict(self, X_test):
-        """Makes predictions for test instances in X_test.
+        """Makes predictions for test instances in X_test based on majority voting in the forest
 
         Args:
             X_test(list of list of obj): The list of testing samples
@@ -576,10 +578,62 @@ class MyRandomForestClassifier:
             y_predicted(list of obj): The predicted target y values (parallel to X_test)
         """
         y_predicted = []
-        header, _ = myutils.build_header_and_domains(self.X_train)
-        for instance in X_test:
-            # Start from the root of the tree and traverse down
-            prediction = self._predict_single(instance, self.tree, header)
-            y_predicted.append(prediction)
+        for X in X_test:
+            result = myutils.calculate_majority_votes(self.classifiers, X)
+            y_predicted.append(result)
 
         return y_predicted
+
+    def generate_initial_forest(self, random_state = None):
+        """ 
+        Generate N trees
+        """
+        N_size_forest = []
+        for _ in range(self.N):
+            # build a tree
+            tree_classifier = MyDecisionTreeClassifier(self.F)
+            X_sample, X_out_of_bag, y_sample, y_out_of_bag = myevaluation.bootstrap_sample(self.X_train, self.y_train, random_state = random_state)
+            tree_classifier.fit(X_sample, y_sample)
+            full_tree = (tree_classifier, X_out_of_bag, y_out_of_bag)
+            N_size_forest.append(full_tree)
+        return N_size_forest
+
+    def refine_forest(self, N_size_forest):
+        """Select top M trees based on Recall
+
+        Args:
+            N_size_forest (list of lists): initial trees & their info generated for random forest
+                Each tree list looks like - [tree classifier, X_test, y_test]
+            M (int): size of final forest
+
+        Returns:
+            M_size_forest (list of obj): final forest of size M; list consists of classifiers
+            
+        Note:
+            This tests for recall because that is what we want to focus on for our NEO Classifier
+
+        """
+        M_size_forest = []
+        tree_recall_dict = dict.fromkeys(range(len(N_size_forest)), None)
+        for index, tree in enumerate(N_size_forest):
+            # have to unpack tree
+            classifier = tree[0]
+            X_test = tree[1]
+            y_test = tree[2]
+
+            y_predicted = classifier.predict(X_test)
+            recall_score = myevaluation.binary_recall_score(y_test, y_predicted)
+            tree_recall_dict[index] = recall_score
+        # get indexes of top M trees with best recall, to keep
+        top_M_indexes = sorted(tree_recall_dict, key=tree_recall_dict.get, reverse=True)[:self.M]
+        for index in top_M_indexes:
+            # add the best trees to return list
+            M_size_forest.append(N_size_forest[index][0])
+        return M_size_forest
+
+    def generate_final_forest(self, random_state = None):
+        # make N trees
+        initial_forest = self.generate_initial_forest(random_state)
+        # pare it down to M trees
+        final_forest = self.refine_forest(initial_forest)
+        return final_forest

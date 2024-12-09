@@ -1,6 +1,7 @@
 import numpy as np
 
 from mysklearn.myclassifiers import MyRandomForestClassifier
+import mysklearn.myutils as myutils
 
 header_interview = ["level", "lang", "tweets", "phd", "interviewed_well"]
 X_train_interview = [
@@ -21,6 +22,75 @@ X_train_interview = [
 ]
 y_train_interview = ["False", "False", "True", "True", "True", "False", "True", "False", "True", "True", "True", "True", "True", "False"]
 
+fitted_forest = [
+    # tree 1
+    ["Attribute", "att0",
+        ["Value", "Junior", 
+            ["Leaf", "True", 9, 14]
+         ],
+        ["Value", "Mid", 
+            ["Leaf", "True", 1, 14]
+        ],
+        ["Value", "Senior",
+            ["Attribute", "att2",
+                ["Value", "no", 
+                    ["Leaf", "False", 2, 4]
+                ],
+                ["Value", "yes", 
+                    ["Leaf", "True", 2, 4]
+                ]
+            ]
+        ]
+    ],
+    # tree 2
+    ["Attribute", "att1",
+        ["Value", "Java", 
+            ["Leaf", "False", 3, 14]
+        ],
+        ["Value", "Python",
+            ["Attribute", "att2",
+                ["Value", "no", 
+                    ["Leaf", "False", 2, 7]
+                ],
+                ["Value", "yes", 
+                    ["Leaf", "True", 5, 7]
+                ]
+            ]
+        ],
+        ["Value", "R", 
+            ["Leaf", "True", 4, 14]
+        ]
+    ],
+    # tree 3
+    ["Attribute", "att1",
+        ["Value", "Java", 
+            ["Leaf", "False", 2, 14]
+        ],
+        ["Value", "Python",
+            ["Attribute", "att0",
+                ["Value", "Junior", 
+                    ["Leaf", "True", 4, 8]
+                ],
+                ["Value", "Mid", 
+                    ["Leaf", "True", 2, 8]
+                ],
+                ["Value", "Senior", 
+                    ["Leaf", "False", 2, 8]
+                ]
+            ]
+        ],
+        ["Value", "R", 
+            ["Leaf", "False", 4, 4]
+        ]
+    ]
+]
+
+X_test_1 = ["Senior", "Python", "yes", "no"] # True
+X_test_2 = ["Senior", "Python", "no", "no"] # False
+X_test_3 = ["Junior", "Java", "no", "yes"] # False
+
+
+
 def test_fit():
     forest = MyRandomForestClassifier(5, 3, 2)
     forest.fit(X_train_interview, y_train_interview)
@@ -32,8 +102,19 @@ def test_fit():
     tree_list = []
     for classifier in forest.classifiers:
         tree_list.append(classifier.tree)
-    unique_trees = set(tree_list)
-    assert len(unique_trees) == 3
+    print(tree_list)
+
+    unique_trees = myutils.check_unique_trees(tree_list)
+    assert unique_trees == True
+
 
 def test_predict():
+    forest = MyRandomForestClassifier(5, 3, 2)
+    forest.fit(X_train_interview, y_train_interview)
+
+    y_pred = forest.predict([X_test_1, X_test_2, X_test_3])
+
+    y_expected = ["True", "False", "False"]
+
+    assert y_pred == y_expected
     pass

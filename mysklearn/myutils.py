@@ -12,6 +12,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from graphviz import Graph
 import mysklearn.myevaluation as myevaluation
+import copy
 
 
 def discretizer_function(value):
@@ -362,6 +363,7 @@ def tdidt(
     header,
     attribute_domain,
     parent_node_size=None,
+    F = None
 ):
     """
     Recursively build a decision tree using the TDIDT (Top-Down Induction of Decision Trees) algorithm.
@@ -373,15 +375,21 @@ def tdidt(
         available_attributes (list of str): The list of attributes available for splitting.
         header (list of str): The list of attribute names.
         attribute_domain (dict): A dictionary mapping each attribute to its possible values.
+        F (int): # of attributes to split on (only specified if using tree for a random forest)
 
     Returns:
         list: A nested list representing the decision tree. Each node is represented as a list where the first element
               is the node type (e.g., "Attribute", "Value", "Leaf"), and subsequent elements represent the node's
               attributes or subtrees.
     """
+    # In case F isn't specified, make F ignorable
+    if F is None:
+        F = len(available_attributes)
+
+    random_attribute_subset = compute_random_subset(available_attributes, F)
     # Select the best attribute based on information gain
     split_attribute = select_attribute(
-        current_instances, available_attributes, header, attribute_domain
+        current_instances, random_attribute_subset, header, attribute_domain
     )
     available_attributes.remove(split_attribute)
     tree = ["Attribute", split_attribute]
@@ -431,6 +439,7 @@ def tdidt(
                 header,
                 attribute_domain,
                 parent_node_size,
+                F
             )
             value_subtree.append(subtree)
 
@@ -792,21 +801,42 @@ def compute_random_subset(values, num_values):
     return values_copy[:num_values]
 
 
-def stratify_train_test_split(X, y, M):
-    # stratified train test split:
+def stratify_train_test_split(X, y, M, random_state = None, shuffle = False):
+    """
+    Perform a stratified train-test split of the dataset.
 
-    # You will need to write code to produce this, but don't feel like you need to reinvent the wheel.
-    # When you hear stratify, think group by! Here are two ideas:
+    This function uses a stratified k-fold split to ensure that the class proportions 
+    in the training and testing sets are similar to those in the original dataset. 
+    The first fold of the k-fold split is used to define the train-test split.
 
-    # 1. If you did the stratified k fold bonus on PA5, you can call this function with k = 3.
-    # Use the first train/test run as your split.
+    Args:
+        X (list of list of obj): The list of instances (samples).
+        y (list of obj): The target values (parallel to X).
+        M (int): Number of trees to keep (used in related contexts, but not directly in this function).
+        random_state (int, optional): Seed for reproducibility if shuffling is enabled, default is None
+        shuffle (bool, optional): Whether to shuffle the dataset before splitting, default is False
 
-    # 2. Add a stratify keyword arg to train_test_split().
-    # If it is True, then do a group by. You can split each group and then concatenate the splits
-
+    Returns:
+        X_train (list of list of obj): Training set features. 
+        y_train (list of obj): Training set labels. 
+        X_test (list of list of obj): Testing set features. 
+        y_test (list of obj): Testing set labels. 
+        """
+    
+    set_random_seed(random_state)
+    
     # M is the number of trees to keep
-    myevaluation.stratified_kfold_split(M)
-    pass
+    k_fold_split = myevaluation.stratified_kfold_split(X, y, n_splits = 3, random_state = random_state, shuffle = shuffle)
+
+    # k_fold_split[0] returns tuple of training indexes and testing indexes
+    train_indexes, test_indexes = k_fold_split[0]
+
+    X_train = [X[index] for index in train_indexes]
+    y_train = [y[index] for index in train_indexes]
+    X_test = [X[index] for index in test_indexes]
+    y_test = [y[index] for index in test_indexes]
+
+    return X_train, y_train, X_test, y_test
 
 
 def concatenate_with_phrase(string_list, join_phrase):
@@ -915,3 +945,21 @@ def plot_multi_hist(dict_object, data):
     # Adjust the layout and show the plot
     plt.tight_layout()
     plt.show()
+
+def check_unique_trees(tree_list):
+    copy.deepcopy(tree_list)
+    for tree in tree_list:
+        tree_list.remove(tree)
+        for other_tree in tree_list:
+            if tree == other_tree:
+                return False
+    return True
+
+def calculate_majority_votes(tree_list, X_val):
+    result_dict = dict.fromkeys(tree_list[0].y_train, 0)
+    for tree in tree_list:
+        prediction = tree.predict([X_val])
+        print("pred", prediction)
+        result_dict[prediction[0]] += 1
+    result = max(result_dict, key = result_dict.get)
+    return result
