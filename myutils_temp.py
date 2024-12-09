@@ -1,9 +1,9 @@
 """
-Programmers: Michael D'Arcy-Evans and Isabel Tilles
+Programmer: Michael D'Arcy-Evans
 Class: CPSC322-01, Fall 2024
-Final Project
-12/6/2024
-We attempted the bonus.
+Programming Assignment #6
+11/5/2024
+I attempted the bonus.
 
 Description: Reused utility functions
 """
@@ -12,6 +12,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from graphviz import Graph
 import mysklearn.myevaluation as myevaluation
+import copy
 
 
 def discretizer_function(value):
@@ -362,6 +363,7 @@ def tdidt(
     header,
     attribute_domain,
     parent_node_size=None,
+    F = None
 ):
     """
     Recursively build a decision tree using the TDIDT (Top-Down Induction of Decision Trees) algorithm.
@@ -373,15 +375,21 @@ def tdidt(
         available_attributes (list of str): The list of attributes available for splitting.
         header (list of str): The list of attribute names.
         attribute_domain (dict): A dictionary mapping each attribute to its possible values.
+        F (int): # of attributes to split on (only specified if using tree for a random forest)
 
     Returns:
         list: A nested list representing the decision tree. Each node is represented as a list where the first element
               is the node type (e.g., "Attribute", "Value", "Leaf"), and subsequent elements represent the node's
               attributes or subtrees.
     """
+    # In case F isn't specified, make F ignorable
+    if F is None:
+        F = len(available_attributes)
+
+    random_attribute_subset = compute_random_subset(available_attributes, F)
     # Select the best attribute based on information gain
     split_attribute = select_attribute(
-        current_instances, available_attributes, header, attribute_domain
+        current_instances, random_attribute_subset, header, attribute_domain
     )
     available_attributes.remove(split_attribute)
     tree = ["Attribute", split_attribute]
@@ -431,6 +439,7 @@ def tdidt(
                 header,
                 attribute_domain,
                 parent_node_size,
+                F
             )
             value_subtree.append(subtree)
 
@@ -597,40 +606,37 @@ def add_nodes_and_edges(
 
 
 def discretization(data, num_bins=None):
-    """Groups data into equal-frequency bins and returns the frequency distribution.
+    """Groups data into five equal-width bins and plots the frequency of each bin.
 
     Args:
         data (list): A list of numeric values to be binned.
-        num_bins (int): The number of bins to split the data into.
 
     Returns:
-        bins (list): A list of tuples representing the bin ranges.
-        bin_labels (list): A list of string labels for each bin.
+        None: Displays a bar chart of the frequency distribution in five equal-width bins.
+
+    Note:
+        Data is assumed to not contain any outliers
     """
-    if num_bins is None:
-        num_bins = 3
+    if not num_bins:
+        num_bins = 2
 
-    # Sort the data to facilitate equal-frequency binning
-    sorted_data = np.sort(data)
-
-    # Compute the bin edges using percentiles
-    bin_edges = np.percentile(sorted_data, np.linspace(0, 100, num_bins + 1))
-
-    # Create the bins by pairing up consecutive percentiles
-    bins = [(bin_edges[i], bin_edges[i + 1]) for i in range(num_bins)]
-
-    # Label the bins with the range for each
-    bin_labels = [f"{lower:.1f} to {upper:.1f}" for lower, upper in bins]
-
-    # Count the frequency of values in each bin
+    range_value = max(data) - min(data)
+    bin_width = range_value / num_bins
+    bins = []
     bin_counts = [0] * num_bins
-    for value in sorted_data:
+    if num_bins == 2:
+        bin_width = np.median(data)
+        bins.append((0.0, bin_width))
+        bins.append((bin_width, max(data)))
+    else:
+        for i in range(num_bins):
+            bins.append((min(data) + i * bin_width, min(data) + (i + 1) * bin_width))
+    for value in data:
         for i, (lower, upper) in enumerate(bins):
             if lower <= value < upper:
                 bin_counts[i] += 1
                 break
-
-    # Return the bins and labels
+    bin_labels = [f"{lower:.1f} to {upper:.1f}" for lower, upper in bins]
     return bins, bin_labels
 
 
@@ -795,21 +801,42 @@ def compute_random_subset(values, num_values):
     return values_copy[:num_values]
 
 
-def stratify_train_test_split(X, y, M):
-    # stratified train test split:
+def stratify_train_test_split(X, y, M, random_state = None, shuffle = False):
+    """
+    Perform a stratified train-test split of the dataset.
 
-    # You will need to write code to produce this, but don't feel like you need to reinvent the wheel.
-    # When you hear stratify, think group by! Here are two ideas:
+    This function uses a stratified k-fold split to ensure that the class proportions 
+    in the training and testing sets are similar to those in the original dataset. 
+    The first fold of the k-fold split is used to define the train-test split.
 
-    # 1. If you did the stratified k fold bonus on PA5, you can call this function with k = 3.
-    # Use the first train/test run as your split.
+    Args:
+        X (list of list of obj): The list of instances (samples).
+        y (list of obj): The target values (parallel to X).
+        M (int): Number of trees to keep (used in related contexts, but not directly in this function).
+        random_state (int, optional): Seed for reproducibility if shuffling is enabled, default is None
+        shuffle (bool, optional): Whether to shuffle the dataset before splitting, default is False
 
-    # 2. Add a stratify keyword arg to train_test_split().
-    # If it is True, then do a group by. You can split each group and then concatenate the splits
-
+    Returns:
+        X_train (list of list of obj): Training set features. 
+        y_train (list of obj): Training set labels. 
+        X_test (list of list of obj): Testing set features. 
+        y_test (list of obj): Testing set labels. 
+        """
+    
+    set_random_seed(random_state)
+    
     # M is the number of trees to keep
-    myevaluation.stratified_kfold_split(M)
-    pass
+    k_fold_split = myevaluation.stratified_kfold_split(X, y, n_splits = 3, random_state = random_state, shuffle = shuffle)
+
+    # k_fold_split[0] returns tuple of training indexes and testing indexes
+    train_indexes, test_indexes = k_fold_split[0]
+
+    X_train = [X[index] for index in train_indexes]
+    y_train = [y[index] for index in train_indexes]
+    X_test = [X[index] for index in test_indexes]
+    y_test = [y[index] for index in test_indexes]
+
+    return X_train, y_train, X_test, y_test
 
 
 def concatenate_with_phrase(string_list, join_phrase):
@@ -865,145 +892,74 @@ def print_dataset_info(pytable):
     )
 
 
-def plot_bar_chart(dict_object, data_state):
-    # Initialize the plot
-    plt.figure(figsize=(10, 6))
+def plot_bar_chart(dict_object):
+    plt.figure()
     plt.xlabel("Class Label")
     plt.ylabel("Frequency")
-    plt.title(f"Histogram of Is_Hazardous Class ({data_state})")
-    # Iterate through the data, and color the bars individually
-    for i, (class_label, count) in enumerate(dict_object.items()):
-        if i % 2 == 0:  # Assuming even indices represent success
-            color = "mediumseagreen"
-        else:  # Odd indices represent failure
-            color = "lightcoral"
-        for bar in plt.bar([class_label], [count], color=color, edgecolor="black"):
-            height = bar.get_height()
-            plt.text(
-                bar.get_x() + bar.get_width() / 2,
-                height / 2,
-                str(height),
-                ha="center",
-                va="center",
-            )
-    # Show the plot
+    plt.title("Histogram of Is_Hazardous Class (Unprocessed)")
+    for bar in plt.bar(
+        dict_object.keys(), dict_object.values(), color="skyblue", edgecolor="black"
+    ):
+        height = bar.get_height()
+        plt.text(
+            bar.get_x() + bar.get_width() / 2,
+            height / 2,
+            str(height),
+            ha="center",
+            va="center",
+        )
     plt.show()
 
 
 def plot_multi_hist(dict_object, data):
     _, axes = plt.subplots(2, 2, figsize=(12, 10))
     axes = axes.flatten()
-
     for idx, (key, labels) in enumerate(dict_object.items()):
         # Get the column index corresponding to the attribute (min, max, velocity, miss)
-        column_index = list(dict_object.keys()).index(key)
+        column_index = list(dict_object.keys()).index(
+            key
+        )  # Get the column index for the attribute
 
         # Extract the binary data for the current attribute (from the first four columns)
-        attribute_data = [row[column_index] for row in data]
-        label_data = [row[-1] == "True" for row in data]
+        attribute_data = [
+            row[column_index] for row in data
+        ]  # Select the relevant column for each row
 
-        num_bins = len(labels)
-
-        bin_counts_true = [0] * num_bins
-        bin_counts_false = [0] * num_bins
-        bin_counts_total = [0] * num_bins
-
-        # Dynamically calculate the bin ranges
-        bin_edges = [
-            min(attribute_data)
-            + i * (max(attribute_data) - min(attribute_data)) / num_bins
-            for i in range(num_bins + 1)
-        ]
-
-        # Calculate the counts for True, False, and Total labels in each bin
-        for i, (attribute_value, label) in enumerate(zip(attribute_data, label_data)):
-            for bin_index in range(num_bins):
-                if bin_edges[bin_index] <= attribute_value <= bin_edges[bin_index + 1]:
-                    if label:
-                        bin_counts_true[bin_index] += 1
-                    else:
-                        bin_counts_false[bin_index] += 1
-                    bin_counts_total[
-                        bin_index
-                    ] += 1  # Increment total for the respective bin
-                    break
-
-        # Plot the histogram with separate bars for True, False, and Total counts
-        bar_width = 0.25  # Adjusted bar width
-        bin_centers = [i for i in range(num_bins)]
-
-        axes[idx].bar(
-            [x - bar_width for x in bin_centers],
-            bin_counts_true,
-            width=bar_width,
-            color="mediumseagreen",
-            label="True",
-            edgecolor="black",
-            align="center",
+        # Plot the histogram
+        counts, bins, _ = axes[idx].hist(
+            attribute_data, bins=2, color="skyblue", edgecolor="black", width=0.4
         )
-        axes[idx].bar(
-            bin_centers,
-            bin_counts_false,
-            width=bar_width,
-            color="lightcoral",
-            label="False",
-            edgecolor="black",
-            align="center",
-        )
-        axes[idx].bar(
-            [x + bar_width for x in bin_centers],
-            bin_counts_total,
-            width=bar_width,
-            color="skyblue",
-            label="Total",
-            edgecolor="black",
-            align="center",
-        )
-
-        # Add the count annotations on the bars
-        for i, (true_count, false_count, total_count) in enumerate(
-            zip(bin_counts_true, bin_counts_false, bin_counts_total)
-        ):
+        for count, bin_edge in zip(counts, bins):
             axes[idx].text(
-                bin_centers[i] - bar_width,
-                (true_count + 0.1) / 2,
-                str(true_count),
-                ha="center",
-                va="bottom",
-                color="black",
+                bin_edge + 0.2, count / 2, str(int(count)), ha="center", va="center"
             )
-            axes[idx].text(
-                bin_centers[i],
-                (false_count + 0.1) / 2,
-                str(false_count),
-                ha="center",
-                va="bottom",
-                color="black",
-            )
-            axes[idx].text(
-                bin_centers[i] + bar_width,
-                (total_count + 0.1) / 2,
-                total_count,
-                ha="center",
-                va="bottom",
-                color="black",
-            )
-
         # Set the title and labels
         axes[idx].set_title(f"Histogram of {key} (Processed)")
-        axes[idx].set_xticks(bin_centers)
+        axes[idx].set_xticks([0, 1])
         axes[idx].set_xticklabels(labels)
 
         # Label the axes
         axes[idx].set_xlabel("Category")
         axes[idx].set_ylabel("Frequency")
 
-        # Add legend
-        axes[idx].legend(loc="upper left")
-
-        # Rotate x-tick labels and adjust layout for all subplots
-        plt.setp(axes[idx].get_xticklabels(), fontsize=8.5)
-
-    # Adjust the layout to prevent label overlap
+    # Adjust the layout and show the plot
     plt.tight_layout()
     plt.show()
+
+def check_unique_trees(tree_list):
+    copy.deepcopy(tree_list)
+    for tree in tree_list:
+        tree_list.remove(tree)
+        for other_tree in tree_list:
+            if tree == other_tree:
+                return False
+    return True
+
+def calculate_majority_votes(tree_list, X_val):
+    result_dict = dict.fromkeys(tree_list[0].y_train, 0)
+    for tree in tree_list:
+        prediction = tree.predict([X_val])
+        print("pred", prediction)
+        result_dict[prediction[0]] += 1
+    result = max(result_dict, key = result_dict.get)
+    return result
