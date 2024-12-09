@@ -1,39 +1,108 @@
 strict graph {
-	node0 [label=estimated_diameter_min shape=box]
-	node1 [label=relative_velocity shape=box]
+	node0 [label=estimated_diameter_max shape=box]
+	node1 [label=miss_distance shape=box]
 	node0 -- node1 [label=0]
-	node2 [label=miss_distance shape=box]
+	node2 [label=relative_velocity shape=box]
 	node1 -- node2 [label=0]
 	node4 [label="False
-339/538" shape=ellipse]
+165/224" shape=ellipse]
 	node2 -- node4 [label=0]
 	node6 [label="False
-199/538" shape=ellipse]
+53/224" shape=ellipse]
 	node2 -- node6 [label=1]
-	node7 [label=miss_distance shape=box]
-	node1 -- node7 [label=1]
-	node9 [label="True
-133/377" shape=ellipse]
-	node7 -- node9 [label=0]
+	node8 [label="False
+6/224" shape=ellipse]
+	node2 -- node8 [label=2]
+	node9 [label=relative_velocity shape=box]
+	node1 -- node9 [label=1]
 	node11 [label="False
-244/377" shape=ellipse]
-	node7 -- node11 [label=1]
-	node12 [label=miss_distance shape=box]
-	node0 -- node12 [label=1]
-	node13 [label=relative_velocity shape=box]
-	node12 -- node13 [label=0]
-	node15 [label="True
-211/430" shape=ellipse]
-	node13 -- node15 [label=0]
-	node17 [label="True
-219/430" shape=ellipse]
-	node13 -- node17 [label=1]
-	node18 [label=relative_velocity shape=box]
-	node12 -- node18 [label=1]
-	node20 [label="True
-155/455" shape=ellipse]
-	node18 -- node20 [label=0]
-	node22 [label="True
-300/455" shape=ellipse]
-	node18 -- node22 [label=1]
+92/188" shape=ellipse]
+	node9 -- node11 [label=0]
+	node13 [label="False
+61/188" shape=ellipse]
+	node9 -- node13 [label=1]
+	node15 [label="False
+35/188" shape=ellipse]
+	node9 -- node15 [label=2]
+	node16 [label=relative_velocity shape=box]
+	node1 -- node16 [label=2]
+	node18 [label="False
+43/194" shape=ellipse]
+	node16 -- node18 [label=0]
+	node20 [label="False
+76/194" shape=ellipse]
+	node16 -- node20 [label=1]
+	node22 [label="False
+75/194" shape=ellipse]
+	node16 -- node22 [label=2]
+	node23 [label=miss_distance shape=box]
+	node0 -- node23 [label=1]
+	node24 [label=relative_velocity shape=box]
+	node23 -- node24 [label=0]
+	node26 [label="True
+58/195" shape=ellipse]
+	node24 -- node26 [label=0]
+	node28 [label="True
+81/195" shape=ellipse]
+	node24 -- node28 [label=1]
+	node30 [label="True
+56/195" shape=ellipse]
+	node24 -- node30 [label=2]
+	node31 [label=relative_velocity shape=box]
+	node23 -- node31 [label=1]
+	node33 [label="True
+59/194" shape=ellipse]
+	node31 -- node33 [label=0]
+	node35 [label="True
+67/194" shape=ellipse]
+	node31 -- node35 [label=1]
+	node37 [label="True
+68/194" shape=ellipse]
+	node31 -- node37 [label=2]
+	node38 [label=relative_velocity shape=box]
+	node23 -- node38 [label=2]
+	node40 [label="True
+54/204" shape=ellipse]
+	node38 -- node40 [label=0]
+	node42 [label="True
+61/204" shape=ellipse]
+	node38 -- node42 [label=1]
+	node44 [label="True
+89/204" shape=ellipse]
+	node38 -- node44 [label=2]
+	node45 [label=miss_distance shape=box]
+	node0 -- node45 [label=2]
+	node46 [label=relative_velocity shape=box]
+	node45 -- node46 [label=0]
+	node48 [label="True
+49/179" shape=ellipse]
+	node46 -- node48 [label=0]
+	node50 [label="True
+70/179" shape=ellipse]
+	node46 -- node50 [label=1]
+	node52 [label="True
+60/179" shape=ellipse]
+	node46 -- node52 [label=2]
+	node53 [label=relative_velocity shape=box]
+	node45 -- node53 [label=1]
+	node55 [label="True
+51/223" shape=ellipse]
+	node53 -- node55 [label=0]
+	node57 [label="True
+77/223" shape=ellipse]
+	node53 -- node57 [label=1]
+	node59 [label="True
+95/223" shape=ellipse]
+	node53 -- node59 [label=2]
+	node60 [label=relative_velocity shape=box]
+	node45 -- node60 [label=2]
+	node62 [label="True
+32/199" shape=ellipse]
+	node60 -- node62 [label=0]
+	node64 [label="True
+51/199" shape=ellipse]
+	node60 -- node64 [label=1]
+	node66 [label="True
+116/199" shape=ellipse]
+	node60 -- node66 [label=2]
 }
