@@ -1,1 +1,1 @@
-# CPSC322 Final Project: Paleontology Classifier
+# CPSC322 Final Project: Near Earth Object Classifier
