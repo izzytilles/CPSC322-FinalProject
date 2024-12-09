@@ -117,4 +117,3 @@ def test_predict():
     y_expected = ["True", "False", "False"]
 
     assert y_pred == y_expected
-    pass
