@@ -10,6 +10,7 @@ Description: Reused utility functions
 
 import numpy as np
 import matplotlib.pyplot as plt
+import pickle
 from graphviz import Graph
 import mysklearn.myevaluation as myevaluation
 import copy
@@ -1053,3 +1054,9 @@ def calculate_majority_votes(tree_list, X_val):
         result_dict[prediction[0]] += 1
     result = max(result_dict, key = result_dict.get)
     return result
+
+def save_pickle(header, tree):
+    packaged_obj = (header, tree)
+    outfile = open("pickled_example.p", "wb")
+    pickle.dump(packaged_obj, outfile)
+    outfile.close
