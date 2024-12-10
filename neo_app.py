@@ -38,8 +38,8 @@ def calculate_majority_votes(tree_list, X_val, header):
     result = max(result_dict, key = result_dict.get)
     return result
 
-def forest_predict(forest, instance, header):
-    result = calculate_majority_votes(forest.classifiers, instance, header)
+def forest_predict(tree_list, instance, header):
+    result = calculate_majority_votes(tree_list, instance, header)
     return result
 
 
