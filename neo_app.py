@@ -30,16 +30,16 @@ def tdidt_predict(header, tree, instance):
         f"Unrecognized value '{attribute_value}' for attribute '{tree[1]}'"
     )
 
-def calculate_majority_votes(tree_list, X_val):
+def calculate_majority_votes(tree_list, X_val, header):
     result_dict = dict.fromkeys(tree_list[0].y_train, 0)
     for tree in tree_list:
-        prediction = tree.predict([X_val])
+        prediction = tdidt_predict(header, tree, X_val)
         result_dict[prediction[0]] += 1
     result = max(result_dict, key = result_dict.get)
     return result
 
-def forest_predict(forest, instance):
-    result = calculate_majority_votes(forest.classifiers, instance)
+def forest_predict(forest, instance, header):
+    result = calculate_majority_votes(forest.classifiers, instance, header)
     return result
 
 
@@ -67,7 +67,7 @@ def predict():
         miss_distance,
     ]
     header, forest = load_model()
-    pred = forest_predict(forest, instance)
+    pred = forest_predict(forest, instance, header)
     if pred is not None:
         return jsonify({"Prediction": pred}), 200
     return "Error making a prediction", 400
