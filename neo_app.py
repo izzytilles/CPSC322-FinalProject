@@ -1,7 +1,5 @@
 import pickle
 from flask import Flask, request, jsonify
-from mysklearn import myutils
-import numpy as np
 
 app = Flask(__name__)
 
@@ -32,8 +30,16 @@ def tdidt_predict(header, tree, instance):
         f"Unrecognized value '{attribute_value}' for attribute '{tree[1]}'"
     )
 
+def calculate_majority_votes(tree_list, X_val):
+    result_dict = dict.fromkeys(tree_list[0].y_train, 0)
+    for tree in tree_list:
+        prediction = tree.predict([X_val])
+        result_dict[prediction[0]] += 1
+    result = max(result_dict, key = result_dict.get)
+    return result
+
 def forest_predict(forest, instance):
-    result = myutils.calculate_majority_votes(forest.classifiers, instance)
+    result = calculate_majority_votes(forest.classifiers, instance)
     return result
 
 
