@@ -31,7 +31,7 @@ def tdidt_predict(header, tree, instance):
     )
 
 def calculate_majority_votes(tree_list, X_val, header):
-    result_dict = dict.fromkeys(tree_list[0].y_train, 0)
+    result_dict = dict.fromkeys(["True", "False"], 0)
     for tree in tree_list:
         prediction = tdidt_predict(header, tree, X_val)
         result_dict[prediction[0]] += 1
