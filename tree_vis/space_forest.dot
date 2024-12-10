@@ -1,0 +1,100 @@
+strict graph {
+	node0 [label=relative_velocity shape=box]
+	node1 [label=estimated_diameter_max shape=box]
+	node0 -- node1 [label=0]
+	node2 [label=miss_distance shape=box]
+	node1 -- node2 [label=0]
+	node4 [label="False
+123/227" shape=ellipse]
+	node2 -- node4 [label=0]
+	node6 [label="False
+69/227" shape=ellipse]
+	node2 -- node6 [label=1]
+	node8 [label="False
+35/227" shape=ellipse]
+	node2 -- node8 [label=2]
+	node9 [label=miss_distance shape=box]
+	node1 -- node9 [label=1]
+	node11 [label="True
+53/136" shape=ellipse]
+	node9 -- node11 [label=0]
+	node13 [label="True
+40/136" shape=ellipse]
+	node9 -- node13 [label=1]
+	node15 [label="True
+43/136" shape=ellipse]
+	node9 -- node15 [label=2]
+	node16 [label=miss_distance shape=box]
+	node1 -- node16 [label=2]
+	node18 [label="True
+41/116" shape=ellipse]
+	node16 -- node18 [label=0]
+	node20 [label="False
+39/116" shape=ellipse]
+	node16 -- node20 [label=1]
+	node22 [label="True
+36/116" shape=ellipse]
+	node16 -- node22 [label=2]
+	node23 [label=estimated_diameter_max shape=box]
+	node0 -- node23 [label=1]
+	node25 [label="False
+138/440" shape=ellipse]
+	node23 -- node25 [label=0]
+	node26 [label=miss_distance shape=box]
+	node23 -- node26 [label=1]
+	node28 [label="True
+53/147" shape=ellipse]
+	node26 -- node28 [label=0]
+	node30 [label="True
+51/147" shape=ellipse]
+	node26 -- node30 [label=1]
+	node32 [label="True
+43/147" shape=ellipse]
+	node26 -- node32 [label=2]
+	node33 [label=miss_distance shape=box]
+	node23 -- node33 [label=2]
+	node35 [label="True
+50/155" shape=ellipse]
+	node33 -- node35 [label=0]
+	node37 [label="True
+60/155" shape=ellipse]
+	node33 -- node37 [label=1]
+	node39 [label="True
+45/155" shape=ellipse]
+	node33 -- node39 [label=2]
+	node40 [label=estimated_diameter_max shape=box]
+	node0 -- node40 [label=2]
+	node41 [label=miss_distance shape=box]
+	node40 -- node41 [label=0]
+	node43 [label="False
+6/79" shape=ellipse]
+	node41 -- node43 [label=0]
+	node45 [label="False
+23/79" shape=ellipse]
+	node41 -- node45 [label=1]
+	node47 [label="False
+50/79" shape=ellipse]
+	node41 -- node47 [label=2]
+	node48 [label=miss_distance shape=box]
+	node40 -- node48 [label=1]
+	node50 [label="True
+50/147" shape=ellipse]
+	node48 -- node50 [label=0]
+	node52 [label="True
+56/147" shape=ellipse]
+	node48 -- node52 [label=1]
+	node54 [label="True
+41/147" shape=ellipse]
+	node48 -- node54 [label=2]
+	node55 [label=miss_distance shape=box]
+	node40 -- node55 [label=2]
+	node57 [label="True
+47/187" shape=ellipse]
+	node55 -- node57 [label=0]
+	node59 [label="True
+73/187" shape=ellipse]
+	node55 -- node59 [label=1]
+	node61 [label="True
+67/187" shape=ellipse]
+	node55 -- node61 [label=2]
+}
