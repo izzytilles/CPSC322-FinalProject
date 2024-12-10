@@ -23,7 +23,7 @@ def tdidt_predict(header, tree, instance):
     for subtree in tree[2:]:  # Iterate through the subtrees
         if subtree[0] == "Value" and subtree[1] == attribute_value:
             return tdidt_predict(
-                instance, subtree[2], header
+                header, subtree[2], instance
             )  # Recurse into the next subtree
     # If no match was found (shouldn't happen in a well-formed tree), we can return a default or raise an error
     raise ValueError(
