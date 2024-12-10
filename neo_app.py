@@ -34,7 +34,7 @@ def calculate_majority_votes(tree_list, X_val, header):
     result_dict = dict.fromkeys(["True", "False"], 0)
     for tree in tree_list:
         prediction = tdidt_predict(header, tree, X_val)
-        result_dict[prediction[0]] += 1
+        result_dict[prediction] += 1
     result = max(result_dict, key = result_dict.get)
     return result
 
