@@ -13,14 +13,22 @@ def load_model():
 
 
 def tdidt_predict(header, tree, instance):
-    info_type = tree[0]
-    if info_type == "Leaf":
-        return tree[1]  # label
-    att_index = header.index(tree[1])
-    for i in range(2, len(tree)):
-        value_list = tree[i]
-        if value_list[1] == instance[att_index]:
-            return tdidt_predict(header, value_list[2], instance)
+    if tree[0] == "Leaf":
+        return tree[1]  # Return the class label stored in the leaf
+    # Tree is structured as ["Attribute", attribute_name, ...]
+    attribute_index = header.index(tree[1])
+    attribute_value = instance[attribute_index]
+
+    # Now we need to traverse based on the attribute's value
+    for subtree in tree[2:]:  # Iterate through the subtrees
+        if subtree[0] == "Value" and subtree[1] == attribute_value:
+            return tdidt_predict(
+                instance, subtree[2], header
+            )  # Recurse into the next subtree
+    # If no match was found (shouldn't happen in a well-formed tree), we can return a default or raise an error
+    raise ValueError(
+        f"Unrecognized value '{attribute_value}' for attribute '{tree[1]}'"
+    )
 
 
 # We need to add "routes" := a function that handles a request
