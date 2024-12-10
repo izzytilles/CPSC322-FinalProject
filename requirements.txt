@@ -1,2 +1,3 @@
 Flask # web framework library
 Gunicorn # the web app library that will serve up flask
+numpy
