@@ -1,6 +1,7 @@
 import pickle
 from flask import Flask, request, jsonify
 from mysklearn import myutils
+import numpy as np
 
 app = Flask(__name__)
 
