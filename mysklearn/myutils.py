@@ -903,9 +903,9 @@ def plot_bar_chart(dict_object, data_state):
     # Iterate through the data, and color the bars individually
     for i, (class_label, count) in enumerate(dict_object.items()):
         if i % 2 == 0:  # Assuming even indices represent success
-            color = "mediumseagreen"
-        else:  # Odd indices represent failure
             color = "lightcoral"
+        else:  # Odd indices represent failure
+            color = "mediumseagreen"
         for bar in plt.bar([class_label], [count], color=color, edgecolor="black"):
             height = bar.get_height()
             plt.text(
