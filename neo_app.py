@@ -1,5 +1,6 @@
 import pickle
 from flask import Flask, request, jsonify
+from mysklearn import myutils
 
 app = Flask(__name__)
 
@@ -7,9 +8,9 @@ app = Flask(__name__)
 def load_model():
     # unpickle header and tree
     infile = open("pickled_example.p", "rb")
-    header, tree = pickle.load(infile)
+    header, forest = pickle.load(infile)
     infile.close()
-    return header, tree
+    return header, forest
 
 
 def tdidt_predict(header, tree, instance):
@@ -29,6 +30,10 @@ def tdidt_predict(header, tree, instance):
     raise ValueError(
         f"Unrecognized value '{attribute_value}' for attribute '{tree[1]}'"
     )
+
+def forest_predict(forest, instance):
+    result = myutils.calculate_majority_votes(forest.classifiers, instance)
+    return result
 
 
 # We need to add "routes" := a function that handles a request
@@ -54,8 +59,8 @@ def predict():
         relative_velocity,
         miss_distance,
     ]
-    header, tree = load_model()
-    pred = tdidt_predict(header, tree, instance)
+    header, forest = load_model()
+    pred = forest_predict(forest, instance)
     if pred is not None:
         return jsonify({"Prediction": pred}), 200
     return "Error making a prediction", 400
