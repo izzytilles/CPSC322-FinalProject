@@ -1,9 +1,9 @@
 """
-Programmer: Michael D'Arcy-Evans
+Programmers: Michael D'Arcy-Evans and Isabel Tilles
 Class: CPSC322-01, Fall 2024
-Programming Assignment #6
-11/5/2024
-I attempted the bonus.
+Final Project
+12/6/2024
+We attempted the bonus.
 
 Description: A table class consisting of a header list and a 2d list of data along with numerous standard table functions
 """
