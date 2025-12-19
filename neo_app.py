@@ -1,5 +1,5 @@
 import pickle
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 
 app = Flask(__name__)
 
@@ -47,8 +47,8 @@ def forest_predict(tree_list, instance, header):
 # e.g. the HTML content for a home page, json response for a predict API endpoint
 @app.route("/")
 def index():
-    # return content and status code
-    return "<h1>Welcome to the interview predictor app</h1>", 200
+    # render the home page with the input form
+    return render_template("index.html")
 
 
 @app.route("/predict")
@@ -71,6 +71,35 @@ def predict():
     if pred is not None:
         return jsonify({"Prediction": pred}), 200
     return "Error making a prediction", 400
+
+
+@app.route("/predict_form", methods=["POST"])
+def predict_form():
+    # parse form data from the POST request
+    estimated_diameter_min = int(request.form.get("estimated_diameter_min"))
+    estimated_diameter_max = int(request.form.get("estimated_diameter_max"))
+    relative_velocity = int(request.form.get("relative_velocity"))
+    miss_distance = int(request.form.get("miss_distance"))
+
+    instance = [
+        estimated_diameter_min,
+        estimated_diameter_max,
+        relative_velocity,
+        miss_distance,
+    ]
+
+    header, forest = load_model()
+    pred = forest_predict(forest, instance, header)
+
+    # render the result page with the prediction and input values
+    return render_template(
+        "result.html",
+        prediction=pred,
+        estimated_diameter_min=estimated_diameter_min,
+        estimated_diameter_max=estimated_diameter_max,
+        relative_velocity=relative_velocity,
+        miss_distance=miss_distance
+    )
 
 
 if __name__ == "__main__":

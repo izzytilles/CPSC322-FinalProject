@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEO Classification Predictor</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Near Earth Object Classification</h1>
+            <p class="subtitle">Predict NEO classification using machine learning</p>
+        </header>
+
+        <main>
+            <form action="/predict_form" method="POST" class="prediction-form">
+                <div class="form-group">
+                    <label for="estimated_diameter_min">Estimated Diameter Min (discretized):</label>
+                    <input type="number" id="estimated_diameter_min" name="estimated_diameter_min" required>
+                    <small class="help-text">Enter discretized value (0, 1, 2, etc.)</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="estimated_diameter_max">Estimated Diameter Max (discretized):</label>
+                    <input type="number" id="estimated_diameter_max" name="estimated_diameter_max" required>
+                    <small class="help-text">Enter discretized value (0, 1, 2, etc.)</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="relative_velocity">Relative Velocity (discretized):</label>
+                    <input type="number" id="relative_velocity" name="relative_velocity" required>
+                    <small class="help-text">Enter discretized value (0, 1, 2, etc.)</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="miss_distance">Miss Distance (discretized):</label>
+                    <input type="number" id="miss_distance" name="miss_distance" required>
+                    <small class="help-text">Enter discretized value (0, 1, 2, etc.)</small>
+                </div>
+
+                <button type="submit" class="btn-submit">Get Prediction</button>
+            </form>
+
+            <div class="info-section">
+                <h3>About This Model</h3>
+                <p>This Random Forest classifier predicts Near Earth Object classifications based on four key features:</p>
+                <ul>
+                    <li><strong>Estimated Diameter (Min & Max):</strong> The size range of the NEO</li>
+                    <li><strong>Relative Velocity:</strong> How fast the NEO is moving relative to Earth</li>
+                    <li><strong>Miss Distance:</strong> How close the NEO comes to Earth</li>
+                </ul>
+                <p><em>Note: All values should be pre-discretized according to the model's binning scheme.</em></p>
+            </div>
+        </main>
+
+        <footer>
+            <p>CPSC 322 Final Project | NEO Classification System</p>
+        </footer>
+    </div>
+</body>
+</html>

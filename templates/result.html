@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prediction Result - NEO Classification</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Prediction Result</h1>
+        </header>
+
+        <main>
+            <div class="result-card">
+                <h2>NEO Classification Prediction</h2>
+
+                <div class="prediction-result">
+                    <span class="result-label">Prediction:</span>
+                    <span class="result-value {{ 'positive' if prediction == 'True' else 'negative' }}">
+                        {{ prediction }}
+                    </span>
+                </div>
+
+                <div class="input-summary">
+                    <h3>Input Parameters</h3>
+                    <table>
+                        <tr>
+                            <td><strong>Estimated Diameter Min:</strong></td>
+                            <td>{{ estimated_diameter_min }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Estimated Diameter Max:</strong></td>
+                            <td>{{ estimated_diameter_max }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Relative Velocity:</strong></td>
+                            <td>{{ relative_velocity }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Miss Distance:</strong></td>
+                            <td>{{ miss_distance }}</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="actions">
+                    <a href="/" class="btn-back">Make Another Prediction</a>
+                </div>
+            </div>
+
+            <div class="model-info">
+                <h3>Model Information</h3>
+                <p>This prediction was generated using a Random Forest ensemble classifier trained on Near Earth Object data. The model uses majority voting across multiple decision trees to make its prediction.</p>
+            </div>
+        </main>
+
+        <footer>
+            <p>CPSC 322 Final Project | NEO Classification System</p>
+        </footer>
+    </div>
+</body>
+</html>
