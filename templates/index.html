@@ -9,34 +9,50 @@
 <body>
     <div class="container">
         <header>
-            <h1>Near Earth Object Classification</h1>
-            <p class="subtitle">Predict NEO classification using machine learning</p>
+            <h1>Will This Comet Kill Us?</h1>
+            <p class="subtitle">Predict if a near-Earth object will be hazardous using machine learning</p>
         </header>
 
         <main>
             <form action="/predict_form" method="POST" class="prediction-form">
                 <div class="form-group">
-                    <label for="estimated_diameter_min">Estimated Diameter Min (discretized):</label>
-                    <input type="number" id="estimated_diameter_min" name="estimated_diameter_min" required>
-                    <small class="help-text">Enter discretized value (0, 1, 2, etc.)</small>
+                    <label for="estimated_diameter_min">Estimated Diameter Min:</label>
+                    <select id="estimated_diameter_min" name="estimated_diameter_min" required>
+                        <option value="">-- Select --</option>
+                        <option value="0">0 = 0.0 - 0.1</option>
+                        <option value="1">1 = 0.1 - 0.2</option>
+                        <option value="2">2 = 0.2 - 1.1</option>
+                    </select>
                 </div>
 
                 <div class="form-group">
-                    <label for="estimated_diameter_max">Estimated Diameter Max (discretized):</label>
-                    <input type="number" id="estimated_diameter_max" name="estimated_diameter_max" required>
-                    <small class="help-text">Enter discretized value (0, 1, 2, etc.)</small>
+                    <label for="estimated_diameter_max">Estimated Diameter Max:</label>
+                    <select id="estimated_diameter_max" name="estimated_diameter_max" required>
+                        <option value="">-- Select --</option>
+                        <option value="0">0 = 0.0 - 0.2</option>
+                        <option value="1">1 = 0.2 - 0.4</option>
+                        <option value="2">2 = 0.4 - 2.5</option>
+                    </select>
                 </div>
 
                 <div class="form-group">
-                    <label for="relative_velocity">Relative Velocity (discretized):</label>
-                    <input type="number" id="relative_velocity" name="relative_velocity" required>
-                    <small class="help-text">Enter discretized value (0, 1, 2, etc.)</small>
+                    <label for="relative_velocity">Relative Velocity:</label>
+                    <select id="relative_velocity" name="relative_velocity" required>
+                        <option value="">-- Select --</option>
+                        <option value="0">0 = 6199.1 - 43077.5</option>
+                        <option value="1">1 = 43077.5 - 64028.3</option>
+                        <option value="2">2 = 64028.3 - 138171.4</option>
+                    </select>
                 </div>
 
                 <div class="form-group">
-                    <label for="miss_distance">Miss Distance (discretized):</label>
-                    <input type="number" id="miss_distance" name="miss_distance" required>
-                    <small class="help-text">Enter discretized value (0, 1, 2, etc.)</small>
+                    <label for="miss_distance">Miss Distance:</label>
+                    <select id="miss_distance" name="miss_distance" required>
+                        <option value="">-- Select --</option>
+                        <option value="0">0 = 131164.3 - 31876675.5</option>
+                        <option value="1">1 = 31876675.5 - 54714412.0</option>
+                        <option value="2">2 = 54714412.0 - 74715777.4</option>
+                    </select>
                 </div>
 
                 <button type="submit" class="btn-submit">Get Prediction</button>
@@ -50,7 +66,7 @@
                     <li><strong>Relative Velocity:</strong> How fast the NEO is moving relative to Earth</li>
                     <li><strong>Miss Distance:</strong> How close the NEO comes to Earth</li>
                 </ul>
-                <p><em>Note: All values should be pre-discretized according to the model's binning scheme.</em></p>
+                <p><em>Note: All values are discretized according to the model's binning scheme.</em></p>
             </div>
         </main>
 
