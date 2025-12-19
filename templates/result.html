@@ -14,12 +14,16 @@
 
         <main>
             <div class="result-card">
-                <h2>NEO Classification Prediction</h2>
+                <h2>Will This Comet Kill Us?</h2>
 
                 <div class="prediction-result">
                     <span class="result-label">Prediction:</span>
                     <span class="result-value {{ 'positive' if prediction == 'True' else 'negative' }}">
-                        {{ prediction }}
+                        {% if prediction == 'True' %}
+                            Start writing your will
+                        {% else %}
+                            We're safe this time!
+                        {% endif %}
                     </span>
                 </div>
 
