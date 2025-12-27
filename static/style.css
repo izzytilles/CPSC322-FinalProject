@@ -183,12 +183,12 @@ main {
 
 .result-value.positive {
     background: #d4edda;
-    color: #155724;
+    color: #721c24;
 }
 
 .result-value.negative {
     background: #f8d7da;
-    color: #721c24;
+    color: #155724;
 }
 
 /* Input Summary */
